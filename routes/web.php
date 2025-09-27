@@ -3,6 +3,11 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/company-profile', function () {
+    return view('company-profile');
+})->name('company-profile');
+
+
 Route::get('/', function () {
     return view('welcome');
 });

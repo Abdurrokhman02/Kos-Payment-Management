@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('Kos', function (Blueprint $table) {
             $table->id();
             $table->string("Nama");
-            $table->int("No");
+            $table->integer("No");
             $table->string("Alamat");
             $table->string("Nomer Telepon");
             $table->string("Status Pembayaran");
