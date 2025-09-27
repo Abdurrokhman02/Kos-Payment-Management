@@ -46,6 +46,9 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Terdaftar Sejak
                                     </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                        Status Pembayaran
+                                    </th>
                                     <th scope="col" class="relative px-6 py-3">
                                         <span class="sr-only">Aksi</span>
                                     </th>
@@ -68,6 +71,25 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             {{ $user->created_at->format('d/m/Y') }}
+                                        </td>
+                                         <td class="px-6 py-4">
+                                            @if ($user->payment_status == 'Lunas')
+                                                <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full">
+                                                    Lunas
+                                                </span>
+                                            @elseif ($user->payment_status == 'Belum Lunas')
+                                                <span class="px-2 py-1 font-semibold leading-tight text-red-700 bg-red-100 rounded-full">
+                                                    Belum Lunas
+                                                </span>
+                                            @elseif ($user->payment_status == 'Menunggu')
+                                                <span class="px-2 py-1 font-semibold leading-tight text-yellow-700 bg-yellow-100 rounded-full">
+                                                    Menunggu
+                                                </span>
+                                            @else
+                                                <span class="px-2 py-1 font-semibold leading-tight text-gray-700 bg-gray-100 rounded-full">
+                                                    -
+                                                </span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <a href="#" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 mr-3">Edit</a>
