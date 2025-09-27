@@ -17,14 +17,12 @@ class ProfileUpdateRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
-            ],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
+            'nomor_kamar' => ['required', 'string', 'max:255'],
+            'nomor_telepon' => ['required', 'string', 'max:255'],
+            'alamat_asal' => ['required', 'string'],
+            'jenis_kelamin' => ['required', 'in:Laki-laki,Perempuan'],
+            'nomor_darurat' => ['required', 'string', 'max:255'],
         ];
     }
 }
