@@ -13,7 +13,7 @@
         <nav class="mx-auto max-w-7xl flex items-center justify-between p-6">
             <!-- Logo -->
             <div class="flex-1 flex justify-start">
-                <a href="#" class="flex items-center gap-2">
+                <a href="{{ route('home') }}" class="flex items-center gap-2">
                     <img class="h-16 w-auto drop-shadow" src="{{ asset('images/Logo.png') }}" alt="Logo Kos Payment Management">
                     <span class="text-lg font-bold text-gray-900 dark:text-white tracking-wide">
                         Kos Payment
@@ -21,16 +21,13 @@
                 </a>
             </div>
 
-            <!-- Menu -->
+            <!-- Menu: Hanya tampilkan Masuk -->
             <div class="flex-1 flex justify-end gap-x-6">
                 <a href="{{ route('login') }}" 
                    class="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100 hover:text-sunshine transition-colors">
                    Masuk
                 </a>
-                <a href="{{ route('register') }}" 
-                   class="rounded-full bg-sunshine px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg hover:scale-105 transform transition-all duration-300">
-                   Daftar
-                </a>
+                <!-- Link Daftar sudah dihapus -->
             </div>
         </nav>
     </header>
@@ -45,6 +42,7 @@
                 Sistem terintegrasi untuk mengelola data penghuni, pembayaran, dan laporan keuangan kosmu.
             </p>
             <div class="mt-10 flex items-center justify-center gap-x-6">
+                <!-- CTA Utama diarahkan ke Login -->
                 <a href="{{ route('login') }}" 
                    class="rounded-full bg-sunshine px-6 py-3 text-base font-semibold text-white shadow-md hover:shadow-xl hover:scale-105 transform transition-all duration-300">
                     Mulai Sekarang
