@@ -39,6 +39,41 @@
                         required autocomplete="username" />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
+                
+                <!-- Jenis Kelamin -->
+                <div class="mt-4">
+                    <x-input-label for="jenis_kelamin" :value="__('Jenis Kelamin')" />
+                    <x-text-input id="jenis_kelamin" class="block mt-1 w-full" type="text" name="jenis_kelamin" :value="old('jenis_kelamin')" required />
+                    <x-input-error :messages="$errors->get('jenis_kelamin')" class="mt-2" />
+                </div>
+
+                <!-- Nomor Kamar -->
+                <div class="mt-4">
+                    <x-input-label for="nomor_kamar" :value="__('Nomor Kamar')" />
+                    <x-text-input id="nomor_kamar" class="block mt-1 w-full" type="text" name="nomor_kamar" :value="old('nomor_kamar')" required />
+                    <x-input-error :messages="$errors->get('nomor_kamar')" class="mt-2" />
+                </div>
+
+                <!-- Nomor Telepon -->
+                <div class="mt-4">
+                    <x-input-label for="nomor_telepon" :value="__('Nomor Telepon')" />
+                    <x-text-input id="nomor_telepon" class="block mt-1 w-full" type="text" name="nomor_telepon" :value="old('nomor_telepon')" required />
+                    <x-input-error :messages="$errors->get('nomor_telepon')" class="mt-2" />
+                </div>
+
+                <!-- Alamat Asal -->
+                <div class="mt-4">
+                    <x-input-label for="alamat_asal" :value="__('Alamat Asal')" />
+                    <x-text-input id="alamat_asal" class="block mt-1 w-full" type="text" name="alamat_asal" :value="old('alamat_asal')" required />
+                    <x-input-error :messages="$errors->get('alamat_asal')" class="mt-2" />
+                </div>
+
+                <!-- Nomor Darurat -->
+                <div class="mt-4">
+                    <x-input-label for="nomor_darurat" :value="__('Nomor Darurat')" />
+                    <x-text-input id="nomor_darurat" class="block mt-1 w-full" type="text" name="nomor_darurat" :value="old('nomor_darurat')" required />
+                    <x-input-error :messages="$errors->get('nomor_darurat')" class="mt-2" />
+                </div>
 
                 <!-- Password -->
                 <div>
