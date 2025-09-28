@@ -3,7 +3,12 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\Admin\UserController; // <<< PASTIKAN INI ADA
+use App\Http\Controllers\Admin\UserController;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use App\Models\Payment;
+use Carbon\Carbon;
+
 
 Route::get('/company-profile', function () {
     return view('company-profile');
@@ -41,15 +46,50 @@ Route::middleware('auth')->group(function () {
 // ====================================================================
 // GRUP RUTE KHUSUS ADMIN
 // ====================================================================
-Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     
     // Dashboard Admin
     Route::get('/dashboard', function () {
-        return view('admin.dashboard'); 
+        // --- DATA PENYEWA ---
+        $penyewa = User::where('role', 'user')->get();
+        $totalPenyewa = $penyewa->count();
+        $jumlahLakiLaki = $penyewa->where('jenis_kelamin', 'Laki-laki')->count();
+        $jumlahPerempuan = $penyewa->where('jenis_kelamin', 'Perempuan')->count();
+
+        // --- DATA PEMBAYARAN ---
+        $paidUsersCount = $penyewa->filter(fn($user) => $user->payment_status === 'Lunas')->count();
+        $unpaidUsersCount = $totalPenyewa - $paidUsersCount;
+        $totalPaymentsThisMonth = Payment::whereMonth('created_at', Carbon::now()->month)
+                                         ->whereYear('created_at', Carbon::now()->year)
+                                         ->sum('amount');
+
+        // --- DATA KAMAR ---
+        // Asumsi total kamar ada 20. Sebaiknya ini disimpan di database nanti.
+        $totalKamar = 6; 
+        $kamarTerisi = $totalPenyewa;
+        $kamarKosong = $totalKamar - $kamarTerisi;
+        
+        // Buat daftar denah kamar (Lantai 1 & 2)
+        $denahKamarLantai1 = [];
+        $denahKamarLantai2 = [];
+        for ($i = 1; $i <= 3; $i++) {
+            $denahKamarLantai1[] = 'A' . $i; // Kamar A1 - A10
+            $denahKamarLantai2[] = 'B' . $i; // Kamar B1 - B10
+        }
+        
+        // Petakan penyewa ke nomor kamarnya untuk denah
+        $penghuniPerKamar = $penyewa->keyBy('nomor_kamar');
+
+        return view('admin.dashboard', compact(
+            'totalPenyewa', 'jumlahLakiLaki', 'jumlahPerempuan',
+            'paidUsersCount', 'unpaidUsersCount', 'totalPaymentsThisMonth',
+            'kamarTerisi', 'kamarKosong', 'denahKamarLantai1', 'denahKamarLantai2', 'penghuniPerKamar'
+        )); 
     })->name('dashboard');
     
-    // Kelola User (Menambah, Melihat Daftar Penyewa)
+    // Kelola User
     Route::resource('users', UserController::class)->only(['index', 'create', 'store']);
+    Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'destroy']);
 });
 
-require __DIR__.'/auth.php'; // Rute Login, Logout, dan Reset Password
+require __DIR__.'/auth.php';
