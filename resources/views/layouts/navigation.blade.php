@@ -12,14 +12,20 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('pembayaran.create')" :active="request()->routeIs('pembayaran.create')">
-                        {{ __('Pembayaran') }}
-                    </x-nav-link>
+                    @if (Auth::user()->role === 'admin')
+                        {{-- NAVIGASI UNTUK ADMIN --}}
+                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index')">
+                            {{ __('Kelola Penghuni') }}
+                        </x-nav-link>
+                    @else
+                        {{-- NAVIGASI UNTUK PENGHUNI --}}
+                        <x-nav-link :href="route('pembayaran.create')" :active="request()->routeIs('pembayaran.create')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
