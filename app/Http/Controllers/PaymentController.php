@@ -20,7 +20,7 @@ class PaymentController extends Controller
                                 ->get();
 
         // Kita asumsikan biaya kos per bulan adalah Rp 500.000 (contoh)
-        $paymentAmount = 500000;
+        $paymentAmount = 550000;
 
         return view('pembayaran', [
             'user' => $user,
