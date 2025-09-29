@@ -73,8 +73,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         $denahKamarLantai1 = [];
         $denahKamarLantai2 = [];
         for ($i = 1; $i <= 3; $i++) {
-            $denahKamarLantai1[] = 'A' . $i; // Kamar A1 - A10
-            $denahKamarLantai2[] = 'B' . $i; // Kamar B1 - B10
+            $denahKamarLantai1[] = 'A' . $i; // Kamar A1 - A3
+            $denahKamarLantai2[] = 'B' . $i; // Kamar B1 - B3
         }
         
         // Petakan penyewa ke nomor kamarnya untuk denah
