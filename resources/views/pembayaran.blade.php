@@ -189,7 +189,28 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Bayar</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <div class="flex items-center">
+                                            @php
+                                                $sortDirection = request('sort') === 'asc' ? 'desc' : 'asc';
+                                                $isSortedByDate = request('sort_by') === 'payment_date';
+                                            @endphp
+                                            <a href="?sort_by=payment_date&sort={{ $isSortedByDate ? $sortDirection : 'desc' }}" class="flex items-center hover:text-indigo-600">
+                                                Tanggal Bayar
+                                                @if($isSortedByDate)
+                                                    <span class="ml-1">
+                                                        @if(request('sort') === 'asc')
+                                                            <i class="fas fa-sort-up"></i>
+                                                        @else
+                                                            <i class="fas fa-sort-down"></i>
+                                                        @endif
+                                                    </span>
+                                                @else
+                                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                                @endif
+                                            </a>
+                                        </div>
+                                    </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 </tr>
@@ -229,6 +250,51 @@
                                 @endforelse
                             </tbody>
                         </table>
+                        @if($paymentHistory->hasPages())
+                            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                                <div class="text-sm text-gray-700">
+                                    Menampilkan <span class="font-medium">{{ $paymentHistory->firstItem() }}</span> sampai <span class="font-medium">{{ $paymentHistory->lastItem() }}</span> dari <span class="font-medium">{{ $paymentHistory->total() }}</span> riwayat pembayaran
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    {{-- Previous Page Link --}}
+                                    @if ($paymentHistory->onFirstPage())
+                                        <span class="px-3 py-1 rounded-md bg-gray-200 text-gray-500 cursor-not-allowed">
+                                            <i class="fas fa-chevron-left"></i> Sebelumnya
+                                        </span>
+                                    @else
+                                        <a href="{{ $paymentHistory->previousPageUrl() }}" class="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
+                                            <i class="fas fa-chevron-left"></i> Sebelumnya
+                                        </a>
+                                    @endif
+
+                                    {{-- Page Numbers --}}
+                                    <div class="hidden md:flex space-x-1">
+                                        @foreach ($paymentHistory->getUrlRange(1, $paymentHistory->lastPage()) as $page => $url)
+                                            @if ($page == $paymentHistory->currentPage())
+                                                <span class="px-3 py-1 rounded-md bg-indigo-600 text-white font-medium">
+                                                    {{ $page }}
+                                                </span>
+                                            @else
+                                                <a href="{{ $url }}" class="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
+                                                    {{ $page }}
+                                                </a>
+                                            @endif
+                                        @endforeach
+                                    </div>
+
+                                    {{-- Next Page Link --}}
+                                    @if ($paymentHistory->hasMorePages())
+                                        <a href="{{ $paymentHistory->nextPageUrl() }}" class="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
+                                            Berikutnya <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    @else
+                                        <span class="px-3 py-1 rounded-md bg-gray-200 text-gray-500 cursor-not-allowed">
+                                            Berikutnya <i class="fas fa-chevron-right"></i>
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             

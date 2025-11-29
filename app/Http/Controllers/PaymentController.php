@@ -16,10 +16,21 @@ class PaymentController extends Controller
     public function create()
     {
         $user = Auth::user();
-        // Ambil riwayat pembayaran untuk user yang sedang login
+        // Ambil parameter sorting
+        $sortBy = request('sort_by', 'payment_date');
+        $sortDirection = request('sort', 'desc');
+        
+        // Validasi arah sorting
+        $sortDirection = in_array(strtolower($sortDirection), ['asc', 'desc']) ? $sortDirection : 'desc';
+        
+        // Ambil riwayat pembayaran untuk user yang sedang login dengan pagination dan sorting
         $paymentHistory = Payment::where('user_id', $user->id)
-                                ->orderBy('payment_date', 'desc')
-                                ->get();
+                                ->orderBy($sortBy, $sortDirection)
+                                ->paginate(10)
+                                ->appends([
+                                    'sort_by' => $sortBy,
+                                    'sort' => $sortDirection
+                                ]); // Menampilkan 10 item per halaman
 
         // Dapatkan harga kamar dari database berdasarkan nomor kamar user
         $kamar = Kamar::where('nomor_kamar', $user->nomor_kamar)->first();
