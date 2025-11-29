@@ -41,6 +41,17 @@ class PaymentController extends Controller
     {
         $user = Auth::user();
         
+        // Cek apakah sudah ada pembayaran di bulan ini
+        $currentMonthPayment = Payment::where('user_id', $user->id)
+            ->whereYear('payment_date', now()->year)
+            ->whereMonth('payment_date', now()->month)
+            ->first();
+            
+        if ($currentMonthPayment) {
+            return redirect()->back()
+                ->with('error', 'Anda sudah melakukan pembayaran untuk bulan ini.');
+        }
+        
         // Dapatkan harga kamar dari database
         $kamar = Kamar::where('nomor_kamar', $user->nomor_kamar)->first();
         
@@ -66,19 +77,22 @@ class PaymentController extends Controller
 
         // Simpan data pembayaran ke database
         try {
-            // Simpan data pembayaran
-            Payment::create([
+            // Simpan data pembayaran dengan waktu saat ini
+            $payment = new Payment([
                 'user_id' => $user->id,
                 'amount' => $paymentAmount,
                 'payment_date' => now(),
                 'status' => 'lunas',
                 'kamar_id' => $kamar->id
             ]);
+            
+            $payment->save();
 
             return redirect()->route('pembayaran.create')
                 ->with('success', 'Pembayaran berhasil dicatat sebagai LUNAS.');
                 
         } catch (\Exception $e) {
+            \Log::error('Gagal menyimpan pembayaran: ' . $e->getMessage());
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
