@@ -14,13 +14,34 @@ class KamarController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $kamars = Kamar::orderBy('lantai')
-                      ->orderBy('nomor_kamar')
-                      ->get();
+        $search = $request->input('search');
+        $sortBy = $request->input('sort_by', 'nomor_kamar');
+        $sortDirection = $request->input('sort', 'asc');
         
-        return view('admin.kamars.index', compact('kamars'));
+        // Validate sort direction
+        $sortDirection = in_array(strtolower($sortDirection), ['asc', 'desc']) ? $sortDirection : 'asc';
+        
+        // Validate sort column
+        $validSortColumns = ['nomor_kamar', 'lantai', 'harga', 'tersedia'];
+        $sortBy = in_array($sortBy, $validSortColumns) ? $sortBy : 'nomor_kamar';
+        
+        $kamars = Kamar::when($search, function($query) use ($search) {
+                $query->where('nomor_kamar', 'like', "%{$search}%")
+                      ->orWhere('lantai', 'like', "%{$search}%")
+                      ->orWhere('harga', 'like', "%{$search}%")
+                      ->orWhereJsonContains('fasilitas', $search);
+            })
+            ->orderBy($sortBy, $sortDirection)
+            ->paginate(10)
+            ->withQueryString();
+        
+        return view('admin.kamars.index', [
+            'kamars' => $kamars,
+            'sortBy' => $sortBy,
+            'sortDirection' => $sortDirection,
+        ]);
     }
 
     /**
