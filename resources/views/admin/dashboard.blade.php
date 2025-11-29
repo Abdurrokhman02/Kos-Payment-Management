@@ -403,9 +403,16 @@ $formattedIncome = 'Rp ' . number_format($totalPaymentsThisMonth, 0, ',', '.');
                                 <i class="fas fa-credit-card text-blue-500 mr-2"></i>
                                 Ringkasan Pembayaran
                             </h2>
-                            <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
-                                {{ now()->translatedFormat('M Y') }}
-                            </span>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
+                                    {{ now()->translatedFormat('M Y') }}
+                                </span>
+                                <a href="{{ route('admin.payments.export') }}" 
+                                   class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                                    <i class="fas fa-file-export mr-1.5"></i>
+                                    Export
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="p-6 flex-1 flex flex-col">

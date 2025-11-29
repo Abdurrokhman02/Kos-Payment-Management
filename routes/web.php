@@ -148,6 +148,13 @@ Route::middleware(['auth', 'role:admin'])
      * - Menghapus kamar
      */
     Route::resource('kamars', KamarController::class);
+    
+    /**
+     * Export Laporan Pembayaran
+     * Mengekspor data pembayaran ke file Excel
+     */
+    Route::get('/payments/export', [\App\Http\Controllers\Admin\PaymentController::class, 'export'])
+        ->name('payments.export');
 });
 
 // ====================================================================
