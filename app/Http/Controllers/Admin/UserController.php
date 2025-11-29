@@ -14,10 +14,37 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::where('role', 'user')->latest()->get();
-        return view('admin.users.index', compact('users'));
+        $search = $request->input('search');
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDirection = $request->input('sort', 'desc');
+        
+        // Validate sort direction
+        $sortDirection = in_array(strtolower($sortDirection), ['asc', 'desc']) ? $sortDirection : 'desc';
+        
+        // Validate sort column
+        $validSortColumns = ['name', 'email', 'nomor_kamar', 'nomor_telepon', 'created_at'];
+        $sortBy = in_array($sortBy, $validSortColumns) ? $sortBy : 'created_at';
+        
+        $users = User::where('role', 'user')
+            ->when($search, function($query) use ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('nomor_kamar', 'like', "%{$search}%")
+                      ->orWhere('nomor_telepon', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy($sortBy, $sortDirection)
+            ->paginate(10)
+            ->withQueryString();
+            
+        return view('admin.users.index', [
+            'users' => $users,
+            'sortBy' => $sortBy,
+            'sortDirection' => $sortDirection,
+        ]);
     }
 
     /**
