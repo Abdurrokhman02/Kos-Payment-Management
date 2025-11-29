@@ -181,72 +181,67 @@
             </div>
 
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @php
-                    // Data kamar contoh - seharusnya diambil dari database
-                    $rooms = [
-                        ['no' => 'A1', 'lantai' => 1, 'harga' => 1500000, 'fasilitas' => ['AC', 'Kamar Mandi Dalam', 'Kasur', 'Meja Belajar', 'Lemari'], 'tersedia' => true],
-                        ['no' => 'A2', 'lantai' => 1, 'harga' => 1400000, 'fasilitas' => ['AC', 'Kamar Mandi Dalam', 'Kasur', 'Meja Belajar'], 'tersedia' => true],
-                        ['no' => 'A3', 'lantai' => 1, 'harga' => 1300000, 'fasilitas' => ['Kipas Angin', 'Kamar Mandi Dalam', 'Kasur', 'Lemari'], 'tersedia' => false],
-                        ['no' => 'B1', 'lantai' => 2, 'harga' => 1600000, 'fasilitas' => ['AC', 'Kamar Mandi Dalam', 'Kasur', 'Meja Belajar', 'Lemari', 'Kulkas'], 'tersedia' => true],
-                        ['no' => 'B2', 'lantai' => 2, 'harga' => 1450000, 'fasilitas' => ['AC', 'Kamar Mandi Dalam', 'Kasur', 'Meja Belajar'], 'tersedia' => true],
-                        ['no' => 'B3', 'lantai' => 2, 'harga' => 1350000, 'fasilitas' => ['Kipas Angin', 'Kamar Mandi Dalam', 'Kasur', 'Lemari'], 'tersedia' => false],
-                    ];
-                    
-                    // Dapatkan nomor WhatsApp dari konfigurasi
-                    $whatsappNumber = config('services.whatsapp.number');
-                    // Format nomor untuk URL WhatsApp (hapus karakter selain angka)
-                    $formattedWhatsappNumber = preg_replace('/[^0-9]/', '', $whatsappNumber);
-                    // Pastikan nomor diawali dengan 62 (kode negara Indonesia)
-                    if (substr($formattedWhatsappNumber, 0, 1) === '0') {
-                        $formattedWhatsappNumber = '62' . substr($formattedWhatsappNumber, 1);
-                    } elseif (substr($formattedWhatsappNumber, 0, 2) !== '62') {
-                        $formattedWhatsappNumber = '62' . $formattedWhatsappNumber;
-                    }
-                @endphp
-
-                @foreach($rooms as $room)
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg {{ $room['tersedia'] ? 'room-available' : 'room-occupied' }}">
+                @forelse($rooms as $room)
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg {{ $room->tersedia ? 'room-available' : 'room-occupied' }}">
                         <div class="relative">
-                            <img src="https://images.unsplash.com/photo-1556912998-c57ff6aefcec?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80" alt="Kamar {{ $room['no'] }}" class="w-full h-48 object-cover">
-                            <div class="absolute top-4 right-4 bg-white dark:bg-gray-900 text-xs font-semibold px-3 py-1 rounded-full shadow-md {{ $room['tersedia'] ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                                {{ $room['tersedia'] ? 'Tersedia' : 'Terisi' }}
+                            <div class="w-full h-48 overflow-hidden">
+                                @if($room->gambar)
+                                    <img src="{{ asset($room->gambar) }}" alt="Kamar {{ $room->nomor_kamar }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                                @else
+                                    @php
+                                        // Array of placeholder image URLs from a free image service (using unsplash)
+                                        $placeholderImages = [
+                                            'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmVkcm9vbXxlbnwwfHwwfHx8MA%3D%3D',
+                                            'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8YmVkcm9vbXxlbnwwfHwwfHx8MA%3D%3D',
+                                            'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8YmVkcm9vbXxlbnwwfHwwfHx8MA%3D%3D',
+                                            'https://images.unsplash.com/photo-1564078516393-cf04bd966897?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGJlZHJvb218ZW58MHx8MHx8fDA%3D',
+                                            'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGJlZHJvb218ZW58MHx8MHx8fDA%3D',
+                                            'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGJlZHJvb218ZW58MHx8MHx8fDA%3D',
+                                            'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGJlZHJvb218ZW58MHx8MHx8fDA%3D'
+                                        ];
+                                        
+                                        // Select a random image for each room
+                                        $index = is_numeric($room->nomor_kamar) ? $room->nomor_kamar : crc32($room->nomor_kamar);
+                                        $index = abs($index) % count($placeholderImages);
+                                        $imageUrl = $placeholderImages[$index];
+                                    @endphp
+                                    <img src="{{ $imageUrl }}" alt="Kamar {{ $room->nomor_kamar }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                                @endif
+                            </div>
+                            <div class="absolute top-4 right-4 bg-white dark:bg-gray-900 text-xs font-semibold px-3 py-1 rounded-full shadow-md {{ $room->tersedia ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                                {{ $room->tersedia ? 'Tersedia' : 'Terisi' }}
                             </div>
                         </div>
                         <div class="p-6">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Kamar {{ $room['no'] }}</h3>
-                                    <p class="text-gray-500 dark:text-gray-400 text-sm">Lantai {{ $room['lantai'] }}</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-2xl font-bold text-sunshine">Rp {{ number_format($room['harga'], 0, ',', '.') }}<span class="text-sm font-normal text-gray-500 dark:text-gray-400">/bulan</span></p>
-                                </div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Kamar {{ $room->nomor_kamar }}</h3>
+                                <span class="text-sm text-gray-500">Lantai {{ $room->lantai }}</span>
                             </div>
+                            <p class="text-2xl font-bold text-sunshine mb-4">Rp {{ number_format($room->harga, 0, ',', '.') }}<span class="text-sm font-normal text-gray-500">/bulan</span></p>
                             
-                            <div class="mt-4">
-                                <h4 class="font-semibold text-gray-800 dark:text-gray-200 mb-2">Fasilitas:</h4>
+                            @if(!empty($room->fasilitas))
+                            <div class="mb-4">
+                                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fasilitas:</h4>
                                 <div class="flex flex-wrap gap-2">
-                                    @foreach($room['fasilitas'] as $fasilitas)
-                                        <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
+                                    @foreach($room->fasilitas as $fasilitas)
+                                        <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded">
                                             {{ $fasilitas }}
                                         </span>
                                     @endforeach
                                 </div>
                             </div>
-
-                            <div class="mt-6">
-                                @if($room['tersedia'])
-                                    @php
-                                        $message = "Halo, saya tertarik untuk memesan Kamar " . $room['no'] . " (Lantai " . $room['lantai'] . ") dengan harga Rp " . number_format($room['harga'], 0, ',', '.') . "/bulan. Apakah kamar ini masih tersedia?";
-                                        $encodedMessage = urlencode($message);
-                                        $whatsappUrl = "https://wa.me/" . $formattedWhatsappNumber . "?text=" . $encodedMessage;
-                                    @endphp
-                                    <a href="{{ $whatsappUrl }}" target="_blank" class="block w-full text-center bg-sunshine hover:bg-opacity-90 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                                        <i class="fab fa-whatsapp mr-2"></i> Pesan via WhatsApp
+                            @endif
+                            
+                            <div class="flex justify-between items-center mt-6">
+                                <a href="#kontak" class="text-sm font-medium text-sunshine hover:underline flex items-center">
+                                    <i class="fas fa-phone-alt mr-2"></i> Hubungi Kami
+                                </a>
+                                @if($room->tersedia)
+                                    <a href="{{ route('login') }}" class="bg-sunshine text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-opacity-90 transition-colors">
+                                        Pesan Sekarang
                                     </a>
                                 @else
-                                    <button class="w-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-medium py-2 px-4 rounded-lg cursor-not-allowed" disabled>
-                                        <i class="fas fa-times-circle mr-2"></i> Kamar Terisi
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">Tidak Tersedia</span>
                                     </button>
                                 @endif
                             </div>
@@ -274,15 +269,15 @@
                     <div class="space-y-4 text-gray-600 dark:text-gray-300">
                         <p class="flex items-start">
                             <i class="fas fa-map-marker-alt text-sunshine text-xl mt-1 mr-3"></i>
-                            <span>Jl. Contoh No. 123, Kelurahan Contoh, Kecamatan Contoh, Kota Contoh, Kode Pos 12345</span>
+                            <span>Jl. HS.Ronggo Waluyo, Puseurjaya, Telukjambe Timur, Karawang, Jawa Barat 41361</span>
                         </p>
                         <p class="flex items-center">
                             <i class="fas fa-phone-alt text-sunshine text-lg mr-3"></i>
-                            <span>+62 812-3456-7890</span>
+                            <span>(0267) 641177</span>
                         </p>
                         <p class="flex items-center">
                             <i class="far fa-envelope text-sunshine text-lg mr-3"></i>
-                            <span>info@kosnyaman.com</span>
+                            <span>info@kosenak.com</span>
                         </p>
                     </div>
 
@@ -291,7 +286,7 @@
                         <ul class="space-y-2 text-gray-600 dark:text-gray-300">
                             <li class="flex items-center">
                                 <i class="fas fa-check-circle text-green-500 mr-2"></i>
-                                <span>5 menit ke Universitas Contoh</span>
+                                <span>1 menit ke Unsika</span>
                             </li>
                             <li class="flex items-center">
                                 <i class="fas fa-check-circle text-green-500 mr-2"></i>
@@ -385,15 +380,15 @@
                     <div class="space-y-2 text-gray-400 text-sm">
                         <p class="flex items-start">
                             <i class="fas fa-map-marker-alt mt-1 mr-3 text-sunshine"></i>
-                            <span>Jl. Contoh No. 123, Kota Contoh</span>
+                            <span>Jl. HS.Ronggo Waluyo, Puseurjaya, Telukjambe Timur, Karawang, Jawa Barat 41361</span>
                         </p>
                         <p class="flex items-center">
                             <i class="fas fa-phone-alt mr-3 text-sunshine"></i>
-                            <span>+62 812-3456-7890</span>
+                            <span>(0267) 641177</span>
                         </p>
                         <p class="flex items-center">
                             <i class="far fa-envelope mr-3 text-sunshine"></i>
-                            <span>info@kosnyaman.com</span>
+                            <span>info@kosenak.com</span>
                         </p>
                         <div class="flex space-x-4 mt-4">
                             <a href="#" class="text-gray-400 hover:text-white transition-colors">

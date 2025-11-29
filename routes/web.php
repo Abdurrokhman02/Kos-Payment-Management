@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\KamarController;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Payment;
@@ -35,8 +36,11 @@ Route::get('/company-profile', function () {
  * Halaman Beranda
  * Halaman landing page aplikasi
  */
+use App\Models\Kamar;
+
 Route::get('/', function () {
-    return view('welcome');
+    $rooms = Kamar::all();
+    return view('welcome', compact('rooms'));
 })->name('home');
 
 // ====================================================================
@@ -135,6 +139,15 @@ Route::middleware(['auth', 'role:admin'])
      */
     Route::resource('users', UserController::class)
         ->only(['index', 'create', 'store', 'destroy']);
+        
+    /**
+     * Manajemen Kamar
+     * - Melihat daftar kamar
+     * - Menambahkan kamar baru
+     * - Mengedit kamar yang ada
+     * - Menghapus kamar
+     */
+    Route::resource('kamars', KamarController::class);
 });
 
 // ====================================================================

@@ -14,7 +14,8 @@ class Kamar extends Model
         'lantai',
         'harga',
         'fasilitas',
-        'tersedia'
+        'tersedia',
+        'gambar'
     ];
 
     protected $casts = [
