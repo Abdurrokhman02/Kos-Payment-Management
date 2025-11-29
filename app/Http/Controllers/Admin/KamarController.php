@@ -42,18 +42,39 @@ class KamarController extends Controller
             'harga' => 'required|numeric|min:0',
             'fasilitas' => 'nullable|array',
             'fasilitas.*' => 'string|max:255',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'gambar' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,png,jpg,gif',
+                'max:2048',
+                'mimetypes:image/jpeg,image/png,image/gif',
+            ],
             'tersedia' => 'boolean'
+        ], [
+            'gambar.image' => 'File harus berupa gambar yang valid',
+            'gambar.mimes' => 'Format file harus jpeg, png, jpg, atau gif',
+            'gambar.max' => 'Ukuran file tidak boleh melebihi 2MB',
+            'gambar.uploaded' => 'Gagal mengunggah file. Pastikan file tidak rusak dan ukurannya tidak melebihi batas',
+            'gambar.mimetypes' => 'Tipe file tidak didukung. Gunakan format jpeg, png, atau gif',
         ]);
 
         if ($request->hasFile('gambar')) {
             try {
-                $path = $request->file('gambar')->store('public/kamar');
+                $file = $request->file('gambar');
+                
+                // Verify the file is actually an image
+                if (!@getimagesize($file->getPathname())) {
+                    return back()->withInput()->withErrors([
+                        'gambar' => 'File yang diunggah bukan gambar yang valid.'
+                    ]);
+                }
+
+                $path = $file->store('public/kamar');
                 $validated['gambar'] = str_replace('public/', 'storage/', $path);
             } catch (\Exception $e) {
                 Log::error('Gagal mengunggah gambar: ' . $e->getMessage());
                 return back()->withInput()->withErrors([
-                    'gambar' => 'Gagal mengunggah gambar. Pastikan file yang diunggah adalah gambar yang valid (maks. 2MB).'
+                    'gambar' => 'Gagal mengunggah gambar. ' . $e->getMessage()
                 ]);
             }
         }
@@ -91,23 +112,44 @@ class KamarController extends Controller
             'harga' => 'required|numeric|min:0',
             'fasilitas' => 'nullable|array',
             'fasilitas.*' => 'string|max:255',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'gambar' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,png,jpg,gif',
+                'max:2048',
+                'mimetypes:image/jpeg,image/png,image/gif',
+            ],
             'tersedia' => 'boolean'
+        ], [
+            'gambar.image' => 'File harus berupa gambar yang valid',
+            'gambar.mimes' => 'Format file harus jpeg, png, jpg, atau gif',
+            'gambar.max' => 'Ukuran file tidak boleh melebihi 2MB',
+            'gambar.uploaded' => 'Gagal mengunggah file. Pastikan file tidak rusak dan ukurannya tidak melebihi batas',
+            'gambar.mimetypes' => 'Tipe file tidak didukung. Gunakan format jpeg, png, atau gif',
         ]);
 
         if ($request->hasFile('gambar')) {
             try {
+                $file = $request->file('gambar');
+                
+                // Verify the file is actually an image
+                if (!@getimagesize($file->getPathname())) {
+                    return back()->withInput()->withErrors([
+                        'gambar' => 'File yang diunggah bukan gambar yang valid.'
+                    ]);
+                }
+                
                 // Hapus gambar lama jika ada
                 if ($kamar->gambar) {
                     Storage::delete(str_replace('storage/', 'public/', $kamar->gambar));
                 }
                 
-                $path = $request->file('gambar')->store('public/kamar');
+                $path = $file->store('public/kamar');
                 $validated['gambar'] = str_replace('public/', 'storage/', $path);
             } catch (\Exception $e) {
                 Log::error('Gagal mengunggah gambar: ' . $e->getMessage());
                 return back()->withInput()->withErrors([
-                    'gambar' => 'Gagal mengunggah gambar. Pastikan file yang diunggah adalah gambar yang valid (maks. 2MB).'
+                    'gambar' => 'Gagal mengunggah gambar. ' . $e->getMessage()
                 ]);
             }
         }

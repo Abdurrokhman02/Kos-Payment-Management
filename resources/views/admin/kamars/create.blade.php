@@ -23,6 +23,28 @@
                 <form method="POST" action="{{ route('admin.kamars.store') }}" enctype="multipart/form-data" class="space-y-6">
                     @csrf
 
+                    @if ($errors->any())
+                        <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-300">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="font-medium">Terdapat kesalahan dalam pengisian form:</h3>
+                                    <div class="mt-2">
+                                        <ul class="list-disc pl-5 space-y-1">
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Nomor Kamar -->
                         <div>
@@ -79,12 +101,16 @@
                         <!-- Status Ketersediaan -->
                         <div class="flex items-center">
                             <div class="flex items-center h-5">
+                                <!-- Hidden input to ensure a value is always submitted -->
+                                <input type="hidden" name="tersedia" value="0">
                                 <input 
                                     id="tersedia" 
                                     name="tersedia" 
                                     type="checkbox" 
+                                    value="1"
                                     class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
                                     {{ old('tersedia', true) ? 'checked' : '' }}
+                                    onclick="this.previousSibling.value = this.checked ? 1 : 0"
                                 >
                             </div>
                             <div class="ml-3 text-sm">
@@ -108,10 +134,11 @@
                                         file:text-sm file:font-semibold
                                         file:bg-indigo-50 file:text-indigo-700
                                         hover:file:bg-indigo-100"
-                                    accept="image/*"
+                                    accept="image/jpeg,image/png,image/jpg,image/gif"
+                                    onchange="validateImage(this)"
                                 >
                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                    Format: PNG, JPG, GIF (Maks. 2MB)
+                                    Format: PNG, JPG, GIF (Maks. 10MB)
                                 </p>
                             </div>
                             
@@ -189,6 +216,72 @@
 
     @push('scripts')
     <script>
+        // Function to validate image before form submission
+        function validateImage(input) {
+            const file = input.files[0];
+            const errorElement = input.parentElement.querySelector('.image-error');
+            
+            // Remove any existing error messages
+            if (errorElement) {
+                errorElement.remove();
+            }
+            
+            // Check if file is selected
+            if (!file) {
+                return true;
+            }
+            
+            // Check file type
+            const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+            if (!validTypes.includes(file.type)) {
+                const errorMsg = document.createElement('p');
+                errorMsg.className = 'mt-1 text-sm text-red-600 dark:text-red-400';
+                errorMsg.textContent = 'Format file tidak didukung. Gunakan format JPEG, PNG, atau GIF.';
+                input.parentElement.appendChild(errorMsg);
+                input.value = '';
+                return false;
+            }
+            
+            // Check file size (10MB)
+            const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+            if (file.size > maxSize) {
+                const errorMsg = document.createElement('p');
+                errorMsg.className = 'mt-1 text-sm text-red-600 dark:text-red-400';
+                errorMsg.textContent = 'Ukuran file melebihi batas maksimal 10MB.';
+                input.parentElement.appendChild(errorMsg);
+                input.value = '';
+                return false;
+            }
+            
+            // Additional validation using FileReader to check if it's actually an image
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function() {
+                    resolve(true);
+                };
+                img.onerror = function() {
+                    const errorMsg = document.createElement('p');
+                    errorMsg.className = 'mt-1 text-sm text-red-600 dark:text-red-400';
+                    errorMsg.textContent = 'File yang diunggah bukan gambar yang valid.';
+                    input.parentElement.appendChild(errorMsg);
+                    input.value = '';
+                    resolve(false);
+                };
+                img.src = URL.createObjectURL(file);
+            });
+        }
+        
+        // Add form validation before submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const fileInput = document.getElementById('gambar');
+            if (fileInput.files.length > 0) {
+                if (!validateImage(fileInput)) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            return true;
+        });
         // Function to preview image before upload
         function previewImage(input) {
             const preview = document.getElementById('image-preview');

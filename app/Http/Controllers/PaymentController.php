@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\Kamar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -19,8 +21,11 @@ class PaymentController extends Controller
                                 ->orderBy('payment_date', 'desc')
                                 ->get();
 
-        // Kita asumsikan biaya kos per bulan adalah Rp 500.000 (contoh)
-        $paymentAmount = 550000;
+        // Dapatkan harga kamar dari database berdasarkan nomor kamar user
+        $kamar = Kamar::where('nomor_kamar', $user->nomor_kamar)->first();
+        
+        // Jika kamar tidak ditemukan, gunakan nilai default
+        $paymentAmount = $kamar ? $kamar->harga : 0;
 
         return view('pembayaran', [
             'user' => $user,
@@ -35,15 +40,47 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-
-        // Simpan data pembayaran ke database
-        Payment::create([
+        
+        // Dapatkan harga kamar dari database
+        $kamar = Kamar::where('nomor_kamar', $user->nomor_kamar)->first();
+        
+        if (!$kamar) {
+            return redirect()->back()
+                ->with('error', 'Data kamar tidak ditemukan.');
+        }
+        
+        // Pastikan harga valid
+        $paymentAmount = (float) $kamar->harga;
+        \Log::info('Mencoba menyimpan pembayaran', [
             'user_id' => $user->id,
-            'amount' => 550000, // Jumlah pembayaran (sesuaikan jika dinamis)
-            'payment_date' => now(), // Waktu saat ini
-            'status' => 'lunas',
+            'kamar_id' => $kamar->id,
+            'amount' => $paymentAmount,
+            'tipe_amount' => gettype($paymentAmount)
         ]);
 
-        return redirect()->route('pembayaran.create')->with('success', 'Pembayaran berhasil!');
+        // Pastikan nilai tidak melebihi batas
+        if ($paymentAmount > 9999999999999.99) { // 13 digit
+            return redirect()->back()
+                ->with('error', 'Nilai pembayaran melebihi batas maksimum yang diizinkan.');
+        }
+
+        // Simpan data pembayaran ke database
+        try {
+            // Simpan data pembayaran
+            Payment::create([
+                'user_id' => $user->id,
+                'amount' => $paymentAmount,
+                'payment_date' => now(),
+                'status' => 'lunas',
+                'kamar_id' => $kamar->id
+            ]);
+
+            return redirect()->route('pembayaran.create')
+                ->with('success', 'Pembayaran berhasil dicatat sebagai LUNAS.');
+                
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 }

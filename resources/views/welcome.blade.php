@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    @php
+        // Dapatkan nomor WhatsApp dari environment variable
+        $whatsappNumber = env('WHATSAPP_CS_NUMBER', '6289454464645');
+        // Format nomor untuk URL WhatsApp (hapus karakter selain angka)
+        $formattedWhatsappNumber = preg_replace('/[^0-9]/', '', $whatsappNumber);
+        // Pastikan nomor diawali dengan 62 (kode negara Indonesia)
+        if (substr($formattedWhatsappNumber, 0, 1) === '0') {
+            $formattedWhatsappNumber = '62' . substr($formattedWhatsappNumber, 1);
+        } elseif (substr($formattedWhatsappNumber, 0, 2) !== '62') {
+            $formattedWhatsappNumber = '62' . $formattedWhatsappNumber;
+        }
+    @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kos Enak - Tempat Tinggal Nyaman di Karawang</title>
@@ -104,6 +116,9 @@
                     Nikmati kenyamanan dan fasilitas terbaik dengan harga terjangkau. Lokasi strategis dekat kampus dan pusat kota.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="https://wa.me/{{ $formattedWhatsappNumber }}" target="_blank" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-full transition-colors flex items-center justify-center">
+                        <i class="fab fa-whatsapp mr-2 text-xl"></i> Hubungi via WhatsApp
+                    </a>
                     <a href="#kamar" class="bg-sunshine hover:bg-opacity-90 text-white font-semibold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg">
                         Lihat Kamar Tersedia
                     </a>
@@ -233,16 +248,20 @@
                             @endif
                             
                             <div class="flex justify-between items-center mt-6">
-                                <a href="#kontak" class="text-sm font-medium text-sunshine hover:underline flex items-center">
-                                    <i class="fas fa-phone-alt mr-2"></i> Hubungi Kami
+                                @php
+                                    $whatsappMessage = "Halo, saya tertarik dengan Kamar " . $room->nomor_kamar . " (Lantai " . $room->lantai . ") dengan harga Rp " . number_format($room->harga, 0, ',', '.') . "/bulan. Apakah kamar ini masih tersedia?";
+                                    $encodedMessage = urlencode($whatsappMessage);
+                                    $whatsappUrl = "https://wa.me/" . $formattedWhatsappNumber . "?text=" . $encodedMessage;
+                                @endphp
+                                <a href="{{ $whatsappUrl }}" target="_blank" class="text-sm font-medium text-sunshine hover:underline flex items-center">
+                                    <i class="fab fa-whatsapp mr-2"></i> Hubungi via WA
                                 </a>
                                 @if($room->tersedia)
-                                    <a href="{{ route('login') }}" class="bg-sunshine text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-opacity-90 transition-colors">
-                                        Pesan Sekarang
+                                    <a href="{{ $whatsappUrl }}" target="_blank" class="bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-4 py-2 rounded-full flex items-center transition-colors">
+                                        <i class="fab fa-whatsapp mr-2"></i> Pesan via WA
                                     </a>
                                 @else
                                     <span class="text-sm text-gray-500 dark:text-gray-400">Tidak Tersedia</span>
-                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -272,8 +291,10 @@
                             <span>Jl. HS.Ronggo Waluyo, Puseurjaya, Telukjambe Timur, Karawang, Jawa Barat 41361</span>
                         </p>
                         <p class="flex items-center">
-                            <i class="fas fa-phone-alt text-sunshine text-lg mr-3"></i>
-                            <span>(0267) 641177</span>
+                            <i class="fab fa-whatsapp text-sunshine text-lg mr-3"></i>
+                            <a href="https://wa.me/{{ $formattedWhatsappNumber }}" target="_blank" class="hover:underline">
+                                +{{ $formattedWhatsappNumber }}
+                            </a>
                         </p>
                         <p class="flex items-center">
                             <i class="far fa-envelope text-sunshine text-lg mr-3"></i>
@@ -334,9 +355,7 @@
                         $encodedDefaultMessage = urlencode($defaultMessage);
                         $whatsappUrl = "https://wa.me/" . $formattedWhatsappNumber . "?text=" . $encodedDefaultMessage;
                     @endphp
-                    <a href="{{ $whatsappUrl }}" 
-                       class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-full transition-all duration-300 flex items-center justify-center gap-2"
-                       target="_blank">
+                    <a href="{{ $whatsappUrl }}" target="_blank" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-full transition-colors flex items-center justify-center gap-2">
                         <i class="fab fa-whatsapp text-xl"></i> Hubungi via WhatsApp
                     </a>
                 @endif
@@ -383,22 +402,27 @@
                             <span>Jl. HS.Ronggo Waluyo, Puseurjaya, Telukjambe Timur, Karawang, Jawa Barat 41361</span>
                         </p>
                         <p class="flex items-center">
-                            <i class="fas fa-phone-alt mr-3 text-sunshine"></i>
-                            <span>(0267) 641177</span>
+                            <i class="fab fa-whatsapp mr-3 text-sunshine"></i>
+                            <a href="https://wa.me/{{ $formattedWhatsappNumber }}" target="_blank" class="hover:underline">
+                                +{{ $formattedWhatsappNumber }}
+                            </a>
                         </p>
                         <p class="flex items-center">
                             <i class="far fa-envelope mr-3 text-sunshine"></i>
                             <span>info@kosenak.com</span>
                         </p>
                         <div class="flex space-x-4 mt-4">
-                            <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                                <i class="fab fa-facebook-f text-xl"></i>
+                            <a href="https://wa.me/{{ $formattedWhatsappNumber }}" target="_blank" class="text-green-400 hover:text-green-300 transition-colors text-2xl">
+                                <i class="fab fa-whatsapp"></i>
                             </a>
-                            <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                                <i class="fab fa-instagram text-xl"></i>
+                            <a href="#" class="text-blue-400 hover:text-blue-300 transition-colors text-2xl">
+                                <i class="fab fa-facebook-f"></i>
                             </a>
-                            <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                                <i class="fab fa-twitter text-xl"></i>
+                            <a href="#" class="text-blue-300 hover:text-blue-200 transition-colors text-2xl">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="text-pink-400 hover:text-pink-300 transition-colors text-2xl">
+                                <i class="fab fa-instagram"></i>
                             </a>
                         </div>
                     </div>

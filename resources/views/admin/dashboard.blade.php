@@ -467,12 +467,6 @@ $formattedIncome = 'Rp ' . number_format($totalPaymentsThisMonth, 0, ',', '.');
                                 </div>
                             </div>
                         </div>
-                        
-                        <button class="mt-6 w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-300 flex items-center justify-center group shadow-lg hover:shadow-xl hover:-translate-y-0.5">
-                            <i class="fas fa-file-invoice-dollar mr-2 group-hover:scale-110 transition-transform"></i>
-                            Lihat Laporan Keuangan
-                            <i class="fas fa-arrow-right ml-2 text-sm opacity-0 group-hover:opacity-100 group-hover:ml-3 transition-all duration-300"></i>
-                        </button>
                     </div>
                 </div>
             </div>
