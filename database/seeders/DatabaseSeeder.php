@@ -14,6 +14,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call([
+            KamarSeeder::class,
+        ]);
+
         // Langsung buat user admin di sini
         User::create([
             'name' => 'Ibu Kos',

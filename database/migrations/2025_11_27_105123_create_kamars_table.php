@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payments', function (Blueprint $table) {
+        Schema::create('kamars', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->decimal('amount', 15, 2);
-            $table->timestamp('payment_date');
-            $table->string('status')->default('pending');
+            $table->string('nomor_kamar', 10)->unique();
+            $table->integer('lantai');
+            $table->decimal('harga', 12, 2);
+            $table->json('fasilitas')->nullable();
+            $table->boolean('tersedia')->default(true);
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payments');
+        Schema::dropIfExists('kamars');
     }
 };

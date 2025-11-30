@@ -4,32 +4,64 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\KamarController;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Payment;
 use Carbon\Carbon;
 
+/*
+|--------------------------------------------------------------------------
+| Rute Web
+|--------------------------------------------------------------------------
+|
+| Di sini Anda dapat mendaftarkan rute web untuk aplikasi Anda. Rute-rute ini
+| akan dimuat oleh RouteServiceProvider dan semuanya akan diberi prefiks 'web'.
+|
+*/
 
+// ====================================================================
+// RUTE UMUM (Tanpa Autentikasi)
+// ====================================================================
+
+/**
+ * Halaman Profil Perusahaan
+ * Menampilkan informasi tentang perusahaan/pemilik kos
+ */
 Route::get('/company-profile', function () {
     return view('company-profile');
 })->name('company-profile');
 
+/**
+ * Halaman Beranda
+ * Halaman landing page aplikasi
+ */
+use App\Models\Kamar;
 
 Route::get('/', function () {
-    return view('welcome');
+    $rooms = Kamar::all();
+    return view('welcome', compact('rooms'));
 })->name('home');
 
 // ====================================================================
-// GRUP RUTE DENGAN MIDDLEWARE 'auth' (Untuk Admin dan User Biasa)
+// RUTE YANG MEMERLUKAN AUTENTIKASI (Untuk Admin dan User Biasa)
 // ====================================================================
 Route::middleware('auth')->group(function () {
     
-    // 1. Rute Profile (Akses untuk semua user yang login)
+    /**
+     * Rute untuk mengelola profil pengguna
+     * - Menampilkan form edit profil
+     * - Memperbarui data profil
+     * - Menghapus akun pengguna
+     */
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // 2. Rute Dashboard Default (Mengalihkan ke Dashboard Spesifik)
+    /**
+     * Dashboard Default
+     * Mengarahkan pengguna ke dashboard yang sesuai berdasarkan peran mereka
+     */
     Route::get('/dashboard', function () {
         $user = Auth::user();
         if ($user->role === 'admin') {
@@ -38,17 +70,29 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('pembayaran.create');
     })->name('dashboard');
     
-    // 3. Rute Pembayaran (Dashboard Khusus User Biasa)
-    Route::get('/pembayaran', [PaymentController::class, 'create'])->name('pembayaran.create');
-    Route::post('/pembayaran', [PaymentController::class, 'store'])->name('pembayaran.store');
+    /**
+     * Rute untuk Pembayaran
+     * - Menampilkan form pembayaran
+     * - Menyimpan data pembayaran
+     */
+    Route::get('/pembayaran', [PaymentController::class, 'create'])
+        ->name('pembayaran.create');
+    Route::post('/pembayaran', [PaymentController::class, 'store'])
+        ->name('pembayaran.store');
 });
 
 // ====================================================================
-// GRUP RUTE KHUSUS ADMIN
+// RUTE KHUSUS ADMIN
 // ====================================================================
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin') // Semua URL dimulai dengan /admin
+    ->name('admin.')  // Semua nama rute dimulai dengan admin.
+    ->group(function () {
     
-    // Dashboard Admin
+    /**
+     * Dashboard Admin
+     * Menampilkan ringkasan statistik dan informasi penting
+     */
     Route::get('/dashboard', function () {
         // --- DATA PENYEWA ---
         $penyewa = User::where('role', 'user')->get();
@@ -60,12 +104,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         $paidUsersCount = $penyewa->filter(fn($user) => $user->payment_status === 'Lunas')->count();
         $unpaidUsersCount = $totalPenyewa - $paidUsersCount;
         $totalPaymentsThisMonth = Payment::whereMonth('created_at', Carbon::now()->month)
-                                         ->whereYear('created_at', Carbon::now()->year)
-                                         ->sum('amount');
+                                        ->whereYear('created_at', Carbon::now()->year)
+                                        ->sum('amount');
 
         // --- DATA KAMAR ---
-        // Asumsi total kamar ada 20. Sebaiknya ini disimpan di database nanti.
-        $totalKamar = 6; 
+        $totalKamar = 6; // TODO: Pindahkan ke konfigurasi/database
         $kamarTerisi = $totalPenyewa;
         $kamarKosong = $totalKamar - $kamarTerisi;
         
@@ -83,13 +126,38 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         return view('admin.dashboard', compact(
             'totalPenyewa', 'jumlahLakiLaki', 'jumlahPerempuan',
             'paidUsersCount', 'unpaidUsersCount', 'totalPaymentsThisMonth',
-            'kamarTerisi', 'kamarKosong', 'denahKamarLantai1', 'denahKamarLantai2', 'penghuniPerKamar'
+            'kamarTerisi', 'kamarKosong', 'denahKamarLantai1', 
+            'denahKamarLantai2', 'penghuniPerKamar'
         )); 
     })->name('dashboard');
     
-    // Kelola User
-    Route::resource('users', UserController::class)->only(['index', 'create', 'store']);
-    Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'destroy']);
+    /**
+     * Manajemen Pengguna
+     * - Melihat daftar pengguna
+     * - Menambahkan pengguna baru
+     * - Menghapus pengguna
+     */
+    Route::resource('users', UserController::class)
+        ->only(['index', 'create', 'store', 'destroy']);
+        
+    /**
+     * Manajemen Kamar
+     * - Melihat daftar kamar
+     * - Menambahkan kamar baru
+     * - Mengedit kamar yang ada
+     * - Menghapus kamar
+     */
+    Route::resource('kamars', KamarController::class);
+    
+    /**
+     * Export Laporan Pembayaran
+     * Mengekspor data pembayaran ke file Excel
+     */
+    Route::get('/payments/export', [\App\Http\Controllers\Admin\PaymentController::class, 'export'])
+        ->name('payments.export');
 });
 
+// ====================================================================
+// RUTE AUTHENTIKASI (Dari Laravel Breeze)
+// ====================================================================
 require __DIR__.'/auth.php';
